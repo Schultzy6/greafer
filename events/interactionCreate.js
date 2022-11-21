@@ -1,10 +1,11 @@
 const { Events } = require( 'discord.js' );
 const Sequelize = require( 'sequelize' );
+const dayjs = require( 'dayjs' );
+const { Op } = require( 'sequelize' );
 
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute ( interaction ) {
-		// If the interaction is a plain old command interaction, handle it as such
 		if ( interaction.isChatInputCommand() ) {
 			const command = interaction.client.commands.get( interaction.commandName );
 
@@ -21,144 +22,79 @@ module.exports = {
 			}
 		}
 
-		// If the interaction is a response to a select menu, handle it accordingly
 		if ( interaction.isModalSubmit() ) {
 			const isNumeric = ( str ) => /^\d+$/.test( str )
-			const SalesDB = interaction.client.db.sales
-			if ( interaction.customId === 'myQuotaModal' ) {
-				const pphsQuota = interaction.fields.getTextInputValue( 'pphsQUOTA' );
-				const ovQuota = interaction.fields.getTextInputValue( 'ovQUOTA' );
-				const revenueQuota = interaction.fields.getTextInputValue( 'revenueQUOTA' );
+			if ( interaction.customId === 'saleModal' ) {
+				const pphsSold = interaction.fields.getTextInputValue( 'pphsSold' );
+				const ovSold = interaction.fields.getTextInputValue( 'ovSold' );
+				const revenueSold = interaction.fields.getTextInputValue( 'revenueSold' );
+				const sales = interaction.client.db.sales
 
-				if ( !isNumeric( pphsQuota ) || !isNumeric( ovQuota ) || !isNumeric( revenueQuota ) ) {
+				if ( !isNumeric( pphsSold ) || !isNumeric( ovSold ) || !isNumeric( revenueSold ) ) {
 					await interaction.reply( `Please try again! Hint: Only numbers are accepted for this command.` )
 					return;
 				}
 
 				try {
-					// equivalent to: INSERT INTO tags (name, description, username) values (?, ?, ?);
-					const OVTAG = await SalesDB.create( {
-						Username: interaction.user.username,
-						PPHSQUOTA: pphsQuota,
-						OVQUOTA: ovQuota,
-						REVENUEQUOTA: revenueQuota,
+					const salesrow = await sales.create( {
+						uid: interaction.user.id,
+						pphs: pphsSold,
+						ov: ovSold,
+						revenue: revenueSold,
 					} );
-					await interaction.reply( { content: `Monthly quotas updated for ${ interaction.user }` } );
-
+					await interaction.reply( { content: `New sales added for ${ interaction.user }` } );
 				}
 				catch ( error ) {
-					if ( error.name === 'SequelizeUniqueConstraintError' ) {
-						const nameTag = interaction.user.username
-						const updateQUOTA = await SalesDB.findOne( { where: { Username: nameTag } } )
-						const quotaPPHS = interaction.fields.getTextInputValue( 'pphsQUOTA' )
-						const quotaOV = interaction.fields.getTextInputValue( 'ovQUOTA' )
-						const quotaREVENUE = interaction.fields.getTextInputValue( 'revenueQUOTA' )
-
-						if ( updateQUOTA ) {
-							updateQUOTA.update( { PPHSQUOTA: quotaPPHS, OVQUOTA: quotaOV, REVENUEQUOTA: quotaREVENUE }, { where: { Username: nameTag } } );
-							await interaction.reply( { content: `Monthly quotas updated for ${ interaction.user }` } );
-
-						}
-					}
-
+					console.error( error )
 				}
-			}
 
-			// This is a simple helper function to test if a string contains only numeric characters
+			} else if ( interaction.customId === 'quotaModal' ) {
+				const pphsQUOTA = interaction.fields.getTextInputValue( 'pphsQUOTA' );
+				const ovQUOTA = interaction.fields.getTextInputValue( 'ovQUOTA' );
+				const revenueQUOTA = interaction.fields.getTextInputValue( 'revenueQUOTA' );
 
-
-			if ( interaction.customId === 'myOVModal' ) {
-				const ovSold = interaction.fields.getTextInputValue( 'ovAmount' )
-
-				if ( !isNumeric( ovSold ) ) {
+				if ( !isNumeric( pphsQUOTA ) || !isNumeric( ovQUOTA ) || !isNumeric( revenueQUOTA ) ) {
 					await interaction.reply( `Please try again! Hint: Only numbers are accepted for this command.` )
 					return;
 				}
+				const [ quotaRow, created ] = await interaction.client.db.quotas.findOrCreate( {
+					where: {
+						uid: interaction.user.id,
+					},
+					defaults: {
+						pphsquota: pphsQUOTA,
+						ovquota: ovQUOTA,
+						revenuequota: revenueQUOTA,
+					}
+				} );
 
-				try {
-					// equivalent to: INSERT INTO tags (name, description, username) values (?, ?, ?);
-					const OVTAG = await SalesDB.create( {
-						Username: interaction.user.username,
-						OV: ovSold,
-					} );
-					await interaction.reply( { content: `${ interaction.fields.getTextInputValue( 'ovAmount' ) } Other Volume added to the database for ${ interaction.user }` } );
+				if ( !created ) {
+					// The row wasnt created, only found. so update the rows quota values to the new input
 
-				}
-				catch ( error ) {
-					if ( error.name === 'SequelizeUniqueConstraintError' ) {
-						const nameTag = interaction.user.username
-						const updateOv = await SalesDB.findOne( { where: { Username: nameTag } } )
-						const soldOV = interaction.fields.getTextInputValue( 'ovAmount' )
-
-						if ( updateOv ) {
-							updateOv.increment( 'OV', { by: soldOV } )
-						}
+					// Only update values that are different to the database (incase the user didn't fill in one of the boxes)
+					if ( quotaRow.dataValues.pphsquota != pphsQUOTA ) {
+						quotaRow.pphsquota = pphsQUOTA;
 					}
 
-					await interaction.reply( { content: `${ interaction.fields.getTextInputValue( 'ovAmount' ) } Other Volume added to the database for ${ interaction.user }` } );
-				}
-			}
-			else if ( interaction.customId === 'myPPHSModal' ) {
-				const pphsSold = interaction.fields.getTextInputValue( 'pphsAmount' )
-
-				if ( !isNumeric( pphsSold ) ) {
-					await interaction.reply( `Please try again! Hint: Only numbers are accepted for this command.` )
-					return;
-				}
-				try {
-					// equivalent to: INSERT INTO tags (name, description, username) values (?, ?, ?);
-					const PPHSTAG = await SalesDB.create( {
-						Username: interaction.user.username,
-						PPHS: pphsSold,
-					} );
-					await interaction.reply( { content: `${ interaction.fields.getTextInputValue( 'pphsAmount' ) } Postpaid Handsets added to the database for ${ interaction.user }` } );
-
-				}
-				catch ( error ) {
-					if ( error.name === 'SequelizeUniqueConstraintError' ) {
-						const nameTag = interaction.user.username
-						const updatePPHS = await SalesDB.findOne( { where: { Username: nameTag } } )
-						const soldPPHS = interaction.fields.getTextInputValue( 'pphsAmount' )
-
-						if ( updatePPHS ) {
-							updatePPHS.increment( 'PPHS', { by: soldPPHS } )
-						}
+					if ( quotaRow.dataValues.ovquota != ovQUOTA ) {
+						quotaRow.ovquota = ovQUOTA;
 					}
 
-					await interaction.reply( { content: `${ interaction.fields.getTextInputValue( 'pphsAmount' ) } Postpaid Handsets added to the database for ${ interaction.user }` } );
-				}
-			}
-			else if ( interaction.customId === 'myRevenueModal' ) {
-				const revenueSold = interaction.fields.getTextInputValue( 'revenueAmount' )
-
-				if ( !isNumeric( revenueSold ) ) {
-					await interaction.reply( `Please try again! Hint: Only numbers are accepted for this command.` )
-					return;
-				}
-				try {
-					// equivalent to: INSERT INTO tags (name, description, username) values (?, ?, ?);
-					const REVENUETAG = await SalesDB.create( {
-						Username: interaction.user.username,
-						Revenue: revenueSold,
-					} );
-					await interaction.reply( { content: `$${ interaction.fields.getTextInputValue( 'revenueAmount' ) } in Revenue added to the database for ${ interaction.user }` } );
-
-				}
-				catch ( error ) {
-					if ( error.name === 'SequelizeUniqueConstraintError' ) {
-						const nameTag = interaction.user.username
-						const updateREVENUE = await SalesDB.findOne( { where: { Username: nameTag } } )
-						const soldREVENUE = interaction.fields.getTextInputValue( 'revenueAmount' )
-
-						if ( updateREVENUE ) {
-							updateREVENUE.increment( 'Revenue', { by: soldREVENUE } )
-						}
+					if ( quotaRow.dataValues.revenuequota != revenueQUOTA ) {
+						quotaRow.revenuequota = revenueQUOTA;
 					}
-
-					await interaction.reply( { content: `$${ interaction.fields.getTextInputValue( 'revenueAmount' ) } in Revenue added to the database for ${ interaction.user }` } );
+					await quotaRow.save();
 				}
+				await interaction.reply( `${ dayjs().format( 'MMMM' ) }'s quotas updated for ${ interaction.user }` )
+
 
 			}
 		}
-	},
-};
+
+		if ( interaction.isButton() ) {
+			const deleteRow = await interaction.client.db.sales.destroy( { where: { id: interaction.customId } } );
+			if ( !deleteRow ) return interaction.reply( 'That tag doesn\'t exist.' );
+			return interaction.reply( `Sale #${ interaction.customId } has been removed from ${ interaction.user }` );
+		}
+	}
+}

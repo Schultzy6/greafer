@@ -52,51 +52,76 @@ const sequelize = new Sequelize( 'database', 'user', 'password', {
 	storage: 'database.sqlite',
 } );
 
-const SalesDB = sequelize.define( 'salesDB', {
-	Username: {
+const sales = sequelize.define( 'sales', {
+	id: {
+		type: Sequelize.INTEGER,
+		autoIncrement: true,
+		primaryKey: true
+	},
+	uid: {
 		type: Sequelize.STRING,
-		unique: true,
+		unique: false,
 	},
-	PPHS: {
+	pphs: {
 		type: Sequelize.INTEGER,
 		defaultValue: 0,
 		allowNull: false,
 	},
-	OV: {
+	ov: {
 		type: Sequelize.INTEGER,
 		defaultValue: 0,
 		allowNull: false,
 	},
-	Revenue: {
+	revenue: {
 		type: Sequelize.INTEGER,
 		defaultValue: 0,
 		allowNull: false,
 	},
-	PPHSQUOTA: {
-		type: Sequelize.INTEGER,
-		defaultValue: 0,
+	date: {
+		type: Sequelize.DATEONLY,
+		defaultValue: Sequelize.NOW,
 		allowNull: false,
-	},
-	OVQUOTA: {
-		type: Sequelize.INTEGER,
-		defaultValue: 0,
-		allowNull: false,
-	},
-	REVENUEQUOTA: {
-		type: Sequelize.INTEGER,
-		defaultValue: 0,
-		allowNull: false,
-	},
-	MonthCreated: {
-		type: Sequelize.STRING,
-		defaultValue: 0,
-		allowNull: false,
-	},
+	}
 } );
 
-SalesDB.sync();
+const quotas = sequelize.define( 'quotas', {
+	id: {
+		type: Sequelize.INTEGER,
+		autoIncrement: true,
+		primaryKey: true
+	},
+	uid: {
+		type: Sequelize.STRING,
+		unique: false,
+	},
+	pphsquota: {
+		type: Sequelize.INTEGER,
+		defaultValue: 0,
+		allowNull: false,
+	},
+	ovquota: {
+		type: Sequelize.INTEGER,
+		defaultValue: 0,
+		allowNull: false,
+	},
+	revenuequota: {
+		type: Sequelize.INTEGER,
+		defaultValue: 0,
+		allowNull: false,
+	},
+	date: {
+		type: Sequelize.DATEONLY,
+		defaultValue: Sequelize.NOW,
+		allowNull: false,
+	}
+
+} );
+
+quotas.sync();
+sales.sync();
 client.db = {
-	sales: SalesDB
+	sales: sales,
+	quotas: quotas
 	// If you create any other tables, add them here
 };
 

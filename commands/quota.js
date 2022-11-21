@@ -11,7 +11,7 @@ module.exports = {
     async execute ( interaction ) {
 
         const modal = new ModalBuilder()
-            .setCustomId( 'myQuotaModal' )
+            .setCustomId( 'quotaModal' )
             .setTitle( 'Current Months Quotas:' )
 
         const pphsQuota = new TextInputBuilder()
