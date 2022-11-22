@@ -47,6 +47,13 @@ module.exports = {
             }
         } );
         // Create & format embed
+        function isWhatPercentOf ( numA, numB ) {
+            return ( numA / numB ) * 100;
+        }
+        const pacingPPHS = isWhatPercentOf( sales[ 0 ].dataValues.pphsSum, quotas[ 0 ].dataValues.pphsquota ).toFixed( 2 );
+        const pacingOV = isWhatPercentOf( sales[ 0 ].dataValues.ovSum, quotas[ 0 ].dataValues.ovquota ).toFixed( 2 );
+        const pacingRevenue = isWhatPercentOf( sales[ 0 ].dataValues.revenueSum, quotas[ 0 ].dataValues.revenuequota ).toFixed( 2 );
+
         const exampleEmbed = new EmbedBuilder()
             .setColor( 0x008000 )
             .setTitle( `${ dayjs().format( 'MMMM' ) }'s Sales` )
@@ -63,12 +70,14 @@ module.exports = {
             { name: 'Postpaid Handsets Sold:', value: `${ sales[ 0 ].dataValues.pphsSum }`, inline: true },
             { name: 'Other Volume Sold:', value: `${ sales[ 0 ].dataValues.ovSum }`, inline: true },
             { name: 'Revenue Sold:', value: `$${ sales[ 0 ].dataValues.revenueSum }`, inline: true },
-        );
-        exampleEmbed.addFields(
+            { name: 'Pacing PPHS:', value: `${ pacingPPHS }%`, inline: true },
+            { name: 'Pacing OV:', value: `${ pacingOV }%`, inline: true },
+            { name: 'Pacing Revenue:', value: `${ pacingRevenue }%`, inline: true },
             { name: 'Postpaid Handset Quota:', value: `${ quotas[ 0 ].dataValues.pphsquota }`, inline: true },
             { name: 'Other Volume Quota:', value: `${ quotas[ 0 ].dataValues.ovquota }`, inline: true },
             { name: 'Revenue Quota:', value: `$${ quotas[ 0 ].dataValues.revenuequota }`, inline: true },
         );
+
         await interaction.reply( { embeds: [ exampleEmbed ] } );
     },
 };

@@ -15,7 +15,6 @@ module.exports = {
             where: { uid: interaction.user.id },
             order: [ [ 'createdAt', 'DESC' ] ]
         } );
-        console.log( saleRows )
         if ( saleRows.length === 0 ) {
             await interaction.reply( 'There are no sales to remove!' );
             return;

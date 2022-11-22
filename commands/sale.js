@@ -35,12 +35,21 @@ module.exports = {
             .setPlaceholder( '0' )
             .setValue( '0' )
             .setRequired( false )
+        const dpSold = new TextInputBuilder()
+            .setCustomId( 'dpSold' )
+            .setLabel( 'DP Sold?\nDp+ $50/Dp Standard $25/Basic $15' )
+            .setStyle( TextInputStyle.Short )
+            .setPlaceholder( '0' )
+            .setValue( '0' )
+            .setRequired( false )
 
         const firstActionRow = new ActionRowBuilder().addComponents( pphsSold );
         const secondActionRow = new ActionRowBuilder().addComponents( ovSold );
         const thirdActionRow = new ActionRowBuilder().addComponents( revenueSold );
+        const fourthActionRow = new ActionRowBuilder().addComponents( dpSold );
+
         // Add inputs to the modal
-        modal.addComponents( firstActionRow, secondActionRow, thirdActionRow );
+        modal.addComponents( firstActionRow, secondActionRow, thirdActionRow, fourthActionRow );
         // Show the modal to the user
         await interaction.showModal( modal );
     },

@@ -27,7 +27,9 @@ module.exports = {
 			if ( interaction.customId === 'saleModal' ) {
 				const pphsSold = interaction.fields.getTextInputValue( 'pphsSold' );
 				const ovSold = interaction.fields.getTextInputValue( 'ovSold' );
+				const dpSold = interaction.fields.getTextInputValue( 'dpSold' );
 				const revenueSold = interaction.fields.getTextInputValue( 'revenueSold' );
+				const totalRevenueSold = parseInt( dpSold ) + parseInt( revenueSold )
 				const sales = interaction.client.db.sales
 
 				if ( !isNumeric( pphsSold ) || !isNumeric( ovSold ) || !isNumeric( revenueSold ) ) {
@@ -40,7 +42,7 @@ module.exports = {
 						uid: interaction.user.id,
 						pphs: pphsSold,
 						ov: ovSold,
-						revenue: revenueSold,
+						revenue: totalRevenueSold,
 					} );
 					await interaction.reply( { content: `New sales added for ${ interaction.user }` } );
 				}
@@ -92,8 +94,13 @@ module.exports = {
 		}
 
 		if ( interaction.isButton() ) {
-			const deleteRow = await interaction.client.db.sales.destroy( { where: { id: interaction.customId } } );
-			if ( !deleteRow ) return interaction.reply( 'That tag doesn\'t exist.' );
+			const deleteRow = await interaction.client.db.sales.destroy( {
+				where: {
+					id: interaction.customId,
+					uid: interaction.user.id
+				}
+			} );
+			if ( !deleteRow ) return;
 			return interaction.reply( `Sale #${ interaction.customId } has been removed from ${ interaction.user }` );
 		}
 	}
