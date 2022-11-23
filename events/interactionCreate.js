@@ -29,6 +29,7 @@ module.exports = {
 				const ovSold = interaction.fields.getTextInputValue( 'ovSold' );
 				const dpSold = interaction.fields.getTextInputValue( 'dpSold' );
 				const revenueSold = interaction.fields.getTextInputValue( 'revenueSold' );
+				const upgradesSold = interaction.fields.getTextInputValue( 'upgradesSold' );
 				const totalRevenueSold = parseInt( dpSold ) + parseInt( revenueSold )
 				const sales = interaction.client.db.sales
 
@@ -43,6 +44,7 @@ module.exports = {
 						pphs: pphsSold,
 						ov: ovSold,
 						revenue: totalRevenueSold,
+						upgrades: upgradesSold
 					} );
 					await interaction.reply( { content: `New sales added for ${ interaction.user }` } );
 				}
