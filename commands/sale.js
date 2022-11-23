@@ -42,14 +42,23 @@ module.exports = {
             .setPlaceholder( '0' )
             .setValue( '0' )
             .setRequired( false )
+        const upgradesSold = new TextInputBuilder()
+            .setCustomId( 'upgradesSold' )
+            .setLabel( 'How many upgrades did you do?' )
+            .setStyle( TextInputStyle.Short )
+            .setPlaceholder( '0' )
+            .setValue( '0' )
+            .setRequired( false )
+
 
         const firstActionRow = new ActionRowBuilder().addComponents( pphsSold );
         const secondActionRow = new ActionRowBuilder().addComponents( ovSold );
         const thirdActionRow = new ActionRowBuilder().addComponents( revenueSold );
         const fourthActionRow = new ActionRowBuilder().addComponents( dpSold );
+        const fifthActionRow = new ActionRowBuilder().addComponents( upgradesSold );
 
         // Add inputs to the modal
-        modal.addComponents( firstActionRow, secondActionRow, thirdActionRow, fourthActionRow );
+        modal.addComponents( firstActionRow, secondActionRow, thirdActionRow, fourthActionRow, fifthActionRow );
         // Show the modal to the user
         await interaction.showModal( modal );
     },
