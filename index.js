@@ -77,6 +77,11 @@ const sales = sequelize.define( 'sales', {
 		defaultValue: 0,
 		allowNull: false,
 	},
+	upgrades: {
+		type: Sequelize.INTEGER,
+		defaultValue: 0,
+		allowNull: false,
+	},
 	date: {
 		type: Sequelize.DATEONLY,
 		defaultValue: Sequelize.NOW,
