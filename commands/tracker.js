@@ -50,6 +50,11 @@ module.exports = {
         function isWhatPercentOf ( numA, numB ) {
             return ( numA / numB ) * 100;
         }
+
+        if ( quotas[ 0 ] === undefined ) {
+            interaction.reply( 'There is no quotas set for this month please set those first before using the tracker!' );
+            return;
+        }
         const pacingPPHS = isWhatPercentOf( sales[ 0 ].dataValues.pphsSum, quotas[ 0 ].dataValues.pphsquota ).toFixed( 2 );
         const pacingOV = isWhatPercentOf( sales[ 0 ].dataValues.ovSum, quotas[ 0 ].dataValues.ovquota ).toFixed( 2 );
         const pacingRevenue = isWhatPercentOf( sales[ 0 ].dataValues.revenueSum, quotas[ 0 ].dataValues.revenuequota ).toFixed( 2 );
