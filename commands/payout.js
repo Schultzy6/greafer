@@ -56,7 +56,7 @@ module.exports = {
     }
 
     const BASE_PAYOUT_PPHS = 312;
-    const BASE_PAYOUT_OV = 112;
+    const BASE_PAYOUT_OV = 117;
     const BASE_PAYOUT_REVENUE = 273;
 
     function evaluatePPHS(sum, quota, threshold = 0.6) {
